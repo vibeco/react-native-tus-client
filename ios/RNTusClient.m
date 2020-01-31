@@ -80,7 +80,16 @@ RCT_EXPORT_METHOD(createUpload:(NSString *)fileUrl
       ? [fileUrl substringFromIndex:7]
       : fileUrl
     ];
-    TUSResumableUpload *upload = [session createUploadFromFile:url retry:3 headers:headers metadata:metadata];
+    TUSResumableUpload *upload;
+    
+    @try {
+        upload = [session createUploadFromFile:url retry:3 headers:headers metadata:metadata];
+    }
+    @catch ( NSException *e ) {
+        NSLog(@"Error uploading file %@, %@, %@", fileUrl, e.name, e.description);
+        onCreatedCallback(nil);
+        return;
+    }
 
     [self.endpoints setObject:endpoint forKey: upload.uploadId];
 
